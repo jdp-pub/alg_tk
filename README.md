@@ -14,6 +14,7 @@ Provides:
 Minimal Example: Ground state of ising system
 
 '''julia
+
     include("../src/Simularity.jl")
     using .Simularity
 
