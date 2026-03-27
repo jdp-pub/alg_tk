@@ -1,7 +1,7 @@
 name = "alg_tk"
 uuid = "70afd6a5-1acf-4b53-88b6-7a68762e86fa"
-version = "1.0.0-DEV"
-authors = ["Jacob Purcell <japurc@proton.me> and contributors"]
+version = "0.1.0-DEV"
+authors = ["Jacob Purcell <japurc@proton.me>"]
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
