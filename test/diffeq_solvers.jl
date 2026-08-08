@@ -21,7 +21,7 @@ Runge-Kutta, dynamical evolution of systems that can be cast as an array of ODEs
 
 # References
 [^list-of-runge-kutt-methods]: [List of Runge-Kutta Methods, https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods (accessed April 14, 2026).](https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods)
-
+https://leopard.tu-braunschweig.de/servlets/MCRFileNodeServlet/dbbs_derivate_00033690/Informatikbericht_2014_03.pdf
 """
 function glrk(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,n::Int=1000,s::Int=10,fargs::AbstractVector=[],xn::Int=100000)
 
@@ -66,94 +66,6 @@ function glrk(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,n::Int=1000,s::I
     for nx in 2:n
         yi = [y + sum([aij[i,j]*f(y,t[nx],fargs) for j in 1:length(roots)])*dt for i in 1:length(roots)]
         y = y + sum([bi[i]*f(y,t[nx],fargs) for i in 1:length(roots)])*dt
-
-        yl[nx,:] = y
-    end
-
-    
-    return yl,t
-end
-
-"""
-    glrka(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,n::Int=1000,kn::Int=10,fargs::AbstractVector=[])
-
-# Arguments
-- `f`: Function that describes dynamical system. 
-- `y0::AbstractVector`: Initial conditions.
-- `ti::Number`: Initial time.
-- `tf::Number`: End time.
-- `n::Int`: The number of timesteps.
-- `s::Int`: Runge-Kutta stages.
-- `fargs::AbstractVector`: Additional parameters to pass to f.
-- `xn::Int`: Resolution of the lagrange polynomial integration.
-
-
-# Return 
-The time evolution of supplied parameters and the corresponding time series.
-Each index of the position series is a time evolution of one of the input parameters.
-For example, if an initial condition is specified [y1 y2], then the output is [y1t y2t] 
-where y1t = [yt1 yt2 ... ytn].
-
-# Description
-Gauss-Legendre Runge-Kutta Adaptive ODE solver[^list-of-runge-kutt-methods]. Good for nth order implicit and explicit 
-Runge-Kutta, dynamical evolution of systems that can be cast as an array of ODEs. This method has an adaptive time step.
-
-# References
-[^list-of-runge-kutt-methods]: [List of Runge-Kutta Methods, https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods (accessed April 14, 2026).](https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods)
-
-"""
-
-function glrka(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,s::Int=10,fargs::AbstractVector=[],xn::Int=100000)
-    y = y0
-    yt = y
-    
-    yl = Array{typeof(y0[1]),2}(undef,n,length(y0))
-    yl[1,:] = y0
-
-    t = ti
-    dt = 1/100
-
-    # calculating the butcher-tableau may need to be moved to its own function
-    # set up polynomial in ascending order, index is polynomial power
-    p1 = normalized_legendre_poly_coef(s) 
-
-    
-    # find roots of polynomial
-    roots = polyroots(p)
-
-    aij = zeros(length(roots),length(roots))
-    bi = zeros(length(roots))
-    lj = zeros(xn)
-    li = zeros(xn)
-
-    for i in 1:length(roots)
-        for j in 1:length(roots)
-            lj = [lagrange_poly(roots,x,j) for x in range(0,roots[i],xn)]
-            
-            # try higher accuracy integrators to reduce iteration count
-            aij[i,j] = riemann_integration(range(0,roots[i],xn),lj)
-        end
-        li = [lagrange_poly(roots,x,i) for x in range(0,1,xn)]
-        bi[i] = riemann_integration(range(0,1,xn),li)
-    end
-
-    # compute runge kutta
-    # TODO: add adaptive check
-    while t < tf
-        yi = [y + sum([aij[i,j]*f(y,t+dt,fargs) for j in 1:length(roots)])*dt for i in 1:length(roots)]
-        y = y + sum([bi[i]*f(y,t+dt,fargs) for i in 1:length(roots)])*dt
-
-        yi = [y + sum([aij[i,j]*f(y,t+dt/2,fargs) for j in 1:length(roots)])*dt for i in 1:length(roots)]
-        y = y + sum([bi[i]*f(y1,t+dt/2,fargs) for i in 1:length(roots)])*dt
-
-        err = abs.((y1.-y2)./2)
-        if maximum(err) < vtol
-            yl = vcat(yl,yt)
-            y = y4
-            t = t + dt
-            tl = vcat(tl,t)
-        end
-        dt = s*dt*((vtol/maximum(err))^(1/5))
 
         yl[nx,:] = y
     end
@@ -478,7 +390,6 @@ end
     - rk4: 4th order.
     - rkdp: Dormand-Prince (Default).
     - glrk: Gauss-Legendre.
-    - glrka: Adaptive Gauss-Legendre.
 - `kwargs...`: Positional arguments for the RK method.
 
 
