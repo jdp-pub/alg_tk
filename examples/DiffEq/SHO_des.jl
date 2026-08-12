@@ -2,7 +2,7 @@ include("../test/Simularity.jl")
 #using .Simularity
 using Plots
 
-# function pattern to pass to rk4
+# function pattern to pass to des
 function SHO(y,t,args)
 
     # simple harmonic oscillator model
@@ -31,7 +31,7 @@ function main()
     fargs = [1.,1.]
     
     # compute with rk4
-    x,t = Simularity.ode(SHO,y,0.,10.,fargs)
+    x,t = Simularity.des(SHO,y,0.,10.,fargs)
 
     p = plot(t,x,
             label=["Position" "Velocity"],

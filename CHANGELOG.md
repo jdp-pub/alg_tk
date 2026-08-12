@@ -37,15 +37,27 @@ This update focuses on expanding core functionality, basic functionality in matr
 ## Add
 
 ### Source
+- bessel.jl
+    - ja: Bessel functions of the first kind
+    - jn: spherical Bessel functions of the first kind
+    - ia: modified Bessel functions of the first kind
+    - ya: Bessel functions of the second kind
+    - yn: spherical Bessel functions of the second kind
+    - ka: modified Bessel functions of the second kind
+    - ha1: Hankel functions of the first kind
+    - ha2: Hankel functions of the second kind
+    - hn1: Spherical Hankel functions of the first kind
+    - hn2: Spherical Hankel functions of the second kind
 - matrices.jl
     - dot(Matrix): Frobenius inner product.
     - contract(Matrix)
     - lpnorm(Matrix)
     - normalize(Matrix)
+    - inv
     - det: determinant
     - MBO: Implement general matrix sizes.
 - matrix_solvers.jl
-    - eig_vals: Add other methods, arnoldi, lanczos, modularize (TODO)
+    - eig_vals: Add other methods, arnoldi, lanczos, modularize
     - absolute and relative tolerances
 - polynomial.jl
     - polyroots: modularize methods
@@ -57,10 +69,13 @@ This update focuses on expanding core functionality, basic functionality in diff
 
 ## Added
 
-### Examples
-- OEO_rk4.jl: optoelectronic oscillator example using 4th order Runge-Kutta. 
+### Examples 
 - SHO_glrk.jl: Simple harmonic oscillator example using Gauss-Legendre Runge-Kutta.
+- SHO_rk45.jl: Simple harmonic oscillator example using 45th order Runge-Kutta.
+- SHO_rk23.jl: Simple harmonic oscillator example using 23rd order Runge-Kutta.
 - SHO_rk4.jl: Simple harmonic oscillator example using 4th order Runge-Kutta.
+- SHO_des.jl: Simple harmonic oscillator example for ode() syntax.
+- SHO-SDE_em.jl: Simple harmonic oscillator with stochastic term example using the Euler-Maruyama method. (TODO)
 
 ### Source
 - array_sorts.jl
@@ -68,15 +83,17 @@ This update focuses on expanding core functionality, basic functionality in diff
     - insertion_sort
     - merge_sort
 - diffeq_solvers.jl
-    - ode: Wrapper for solvers. (TODO)
+    - des: Wrapper for DE solvers.
     - rk1: Runge-Kutta order 1.
     - rk2
-    - rk23 (TODO)
+    - rk23: rkbs wrapper
+    - rkbs: Runge-Kutta Bogacki-Shampine method (TODO)
     - rk3
     - rk4
-    - rk45 (TODO)
+    - rk45: rkdp wrapper
+    - rkdp: Runge-Kutta Dormand Price method.
     - glrk: Gauss-Legendre Runge Kutta.
-    - glrka: Adaptive Gauss-Legendre Runge Kutta. (TODO)
+    - em: Euler-Maruyama Method; Stocahstic DE solver. (TODO)
 - matrices.jl
     - diag
     - dot

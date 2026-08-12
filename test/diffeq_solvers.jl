@@ -1,4 +1,61 @@
 """
+    des(args...;f=rkdp,kwargs...)
+
+# Arguments
+- `args...`: Arguments for the RK method. 
+- `f`: The name of the RK method to be used
+    - rk1: 1th order.
+    - rk2: 2th order.
+    - rk3: 3th order.
+    - rk4: 4th order.
+    - rkdp: Dormand-Prince (Default).
+    - glrk: Gauss-Legendre.
+- `kwargs...`: Positional arguments for the RK method.
+
+
+# Return 
+The time evolution of supplied parameters and the corresponding time series. 
+Each index of the position series is a time evolution of one of the input parameters.
+For example, if an initial condition is specified [y1 y2], then the output is [y1t y2t] 
+where y1t = [yt1 yt2 ... ytn].
+
+# Description
+Wrapper for the Runge-Kutta differential equation solver methods.
+
+# References
+[^list-of-runge-kutt-methods]: [List of Runge-Kutta Methods, https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods (accessed April 14, 2026).](https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods)
+[^adaptive-runge-kutta-methods]: [Adaptive Runge-Kutta Methods, https://www.youtube.com/watch?v=6bCBXvsD7gw](https://www.youtube.com/watch?v=6bCBXvsD7gw)
+"""
+function des(args...;f=rkdp,kwargs...)
+    return f(args...;kwargs...)
+end
+
+"""
+    em()
+
+# Arguments
+
+
+
+# Return 
+The time evolution of supplied parameters and the corresponding time series.
+
+# Description
+Euler-Maruyama method SDE solver.
+
+# References
+
+"""
+
+function em()
+
+
+
+end
+
+
+
+"""
     glrk(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,n::Int=1000,s::Int=10,fargs::AbstractVector=[],xn::Int=100000)
 
 # Arguments
@@ -172,6 +229,83 @@ function rk2(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,n::Int=1000,fargs
     return yl,t
 end
 
+"""
+    rkbs(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,n::Int=1000,fargs::AbstractVector=[])
+
+
+# Arguments
+- `f`: Function that describes dynamical system. 
+- `y0::AbstractVector`: Initial conditions.
+- `ti::Number`: Initial time.
+- `tf::Number`: End time. 
+- `fargs::AbstractVector`: Additional parameters to pass to f.
+- `vtol::AbstractFloat`
+- `s::AbstractFloat` Safety factor, 
+
+
+# Return 
+The time evolution of supplied parameters and the corresponding time series. 
+Each index of the position series is a time evolution of one of the input parameters.
+For example, if an initial condition is specified [y1 y2], then the output is [y1t y2t] 
+where y1t = [yt1 yt2 ... ytn].
+
+# Description
+Dormand-Price Runge-Kutta ODE solver[^list-of-runge-kutt-methods], dynamical evolution of systems that can be cast 
+as an array of ODEs. This method has an adaptive time step[^adaptive-runge-kutta-methods].
+
+# References
+[^list-of-runge-kutt-methods]: [List of Runge-Kutta Methods, https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods (accessed April 14, 2026).](https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods)
+[^adaptive-runge-kutta-methods]: [Adaptive Runge-Kutta Methods, https://www.youtube.com/watch?v=6bCBXvsD7gw](https://www.youtube.com/watch?v=6bCBXvsD7gw)
+"""
+rk23(args...;kwargs...) = des(args...;f=rkbs,kwargs...)
+function rkbs(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,fargs::AbstractVector=[],vtol::AbstractFloat=1E-10,s::AbstractFloat=0.9) 
+    t = ti
+    dt = 1/1000
+    tl = [ti]
+
+    y = y0
+    yl = Array{typeof(y0[1]),2}(undef,1,length(y0))
+    yl[1,:] = y0
+
+    k1 = typeof(y)(undef,size(y))
+    k2 = typeof(y)(undef,size(y))
+    k3 = typeof(y)(undef,size(y))
+    k4 = typeof(y)(undef,size(y))
+    nx = 2
+    while t < tf
+        k1 = f(y,t,fargs).*dt
+
+        yt = y + k1/2
+        k2 = f(yt,t+dt/2,fargs).*dt
+
+        yt = y + 0*k1 + 3*k2/4
+        k3 = f(yt,t+3*dt/4,fargs).*dt
+
+        yt = y + 9*k1/2 + k2/3 + 4*k3/9
+        k4 = f(yt,t+dt,fargs).*dt
+
+        yt = y + 2*k1/9 + k2/3 + 4*k3/9
+
+        # 3nd order solution
+        y3 = yt
+        
+        # 2rd order solution
+        y2 = y + 7*k1/24 + k2/4 + k3/3 + k4/8
+  
+        err = abs.((y3.-y2)./2)
+        if maximum(err) < vtol
+            y = y2
+            yl = vcat(yl,reshape(y2, 1, :))
+            t = t + dt
+            tl = vcat(tl,t)
+        end
+        dt = s*dt*((vtol/maximum(err))^(1/3))
+    end
+
+    return yl,tl
+end
+
+
 
 """
     rk3(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,n::Int=1000,fargs::AbstractVector=[])
@@ -319,13 +453,13 @@ as an array of ODEs. This method has an adaptive time step[^adaptive-runge-kutta
 [^list-of-runge-kutt-methods]: [List of Runge-Kutta Methods, https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods (accessed April 14, 2026).](https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods)
 [^adaptive-runge-kutta-methods]: [Adaptive Runge-Kutta Methods, https://www.youtube.com/watch?v=6bCBXvsD7gw](https://www.youtube.com/watch?v=6bCBXvsD7gw)
 """
+rk45(args...;kwargs...) = des(args...;f=rkdp,kwargs...)
 function rkdp(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,fargs::AbstractVector=[],vtol::AbstractFloat=1E-10,s::AbstractFloat=0.9) 
     t = ti
     dt = 1/1000
     tl = [ti]
 
-    y = Array{typeof(y0[1]),2}(undef,1,length(y0))
-    y[:] = y0
+    y = y0
     yl = Array{typeof(y0[1]),2}(undef,1,length(y0))
     yl[1,:] = y0
 
@@ -367,8 +501,8 @@ function rkdp(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,fargs::AbstractV
    
         err = abs.((y4.-y5)./2)
         if maximum(err) < vtol
-            yl = vcat(yl,yt)
             y = y4
+            yl = vcat(yl,reshape(y4, 1, :))
             t = t + dt
             tl = vcat(tl,t)
         end
@@ -378,35 +512,5 @@ function rkdp(f,y0::AbstractVector,ti::Number=0.,tf::Number=10.,fargs::AbstractV
     return yl,tl
 end
 
-"""
-    ode(args...;f=rkdp,kwargs...)
 
-# Arguments
-- `args...`: Arguments for the RK method. 
-- `f`: The name of the RK method to be used
-    - rk1: 1th order.
-    - rk2: 2th order.
-    - rk3: 3th order.
-    - rk4: 4th order.
-    - rkdp: Dormand-Prince (Default).
-    - glrk: Gauss-Legendre.
-- `kwargs...`: Positional arguments for the RK method.
-
-
-# Return 
-The time evolution of supplied parameters and the corresponding time series. 
-Each index of the position series is a time evolution of one of the input parameters.
-For example, if an initial condition is specified [y1 y2], then the output is [y1t y2t] 
-where y1t = [yt1 yt2 ... ytn].
-
-# Description
-Wrapper for the Runge-Kutta differential equation solver methods.
-
-# References
-[^list-of-runge-kutt-methods]: [List of Runge-Kutta Methods, https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods (accessed April 14, 2026).](https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods)
-[^adaptive-runge-kutta-methods]: [Adaptive Runge-Kutta Methods, https://www.youtube.com/watch?v=6bCBXvsD7gw](https://www.youtube.com/watch?v=6bCBXvsD7gw)
-"""
-function ode(args...;f=rkdp,kwargs...)
-    return f(args...;kwargs...)
-end
 

@@ -1,4 +1,4 @@
-include("../test/Simularity.jl")
+include("../../test/Simularity.jl")
 #using .Simularity
 using Plots
 
@@ -17,7 +17,7 @@ function SHO(y,t,args)
     dx = z
     dz = -k/m*x
     
-    return [dx dz]
+    return [dx, dz]
 end
 
 
@@ -30,8 +30,8 @@ function main()
     # any arguments to pass to the function
     fargs = [1.,1.]
     
-    # compute with rk4
-    x,t = Simularity.rkdp(SHO,y,0.,10.,fargs)
+    # compute with rk45
+    x,t = Simularity.rk45(SHO,y,0.,10.,fargs)
 
     p = plot(t,x,
             label=["Position" "Velocity"],
